@@ -1,30 +1,7 @@
-import * as express from 'express';
-import * as bodyParser from 'body-parser';
+import App from './app';
+import MeetingNoteController from './meeting/notes-controller';
 
-const app = express();
 
-function loggerMiddleware(
-  request: express.Request,
-  response: express.Response,
-  next
-) {
-  console.warn(`${request.method} ${request.path}`);
+const app = new App([new MeetingNoteController()], 5000);
 
-  console.log(`${request.method} ${request.path}`);
-  next();
-}
-
-app.use(loggerMiddleware);
- 
-app.get('/test', (request, response) => {
-  response.send('Hello world!');
-});
-
-app.use(bodyParser.json());
-
-app.post('/', (request, response) => {
-  response.send(request.body);
-});
-
- 
-app.listen(5000);
+app.listen();
