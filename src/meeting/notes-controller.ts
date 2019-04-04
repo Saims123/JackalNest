@@ -54,7 +54,7 @@ class MeetingNoteController {
     this.router.post(this.path + '/test', this.addNewNote);
     this.router.get(
       this.path + '/:id',
-      this.getAllStudentNotes.bind(this)
+      this.getStudentNotesByID
     );
   }
 
@@ -74,6 +74,10 @@ class MeetingNoteController {
   getStudentNotesByID(request: express.Request, response: express.Response) {
     const id = request.params.id;
     notesModel.find({student: {uniqueID: id}}).then(studentNote => {response.send(studentNote)})
+  }
+
+  removeStudentNoteByID(request: express.Request, response: express.Response) {
+    const id = request.params.id;
   }
 
   getAllStudentNotes = (

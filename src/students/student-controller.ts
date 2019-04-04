@@ -1,66 +1,66 @@
 import * as express from 'express';
-import {MeetingNote, StudentNotes} from './meeting-interfaces';
+import { Student } from './student-interface';
+import studentModel from './student-model';
+class StudentController {
+  public path = '/student';
+  public router = express.Router();
+  private students = studentModel;
 
-class MeetingNoteController {
-    public path = '/notes';
-    public router = express.Router();
-    public meetingNotes: MeetingNote[] = [
-      {
-        title: 'Nothing special',
-        todoList: [
-          { task: 'Task1', completed: false },
-          { task: 'Task2', completed: true }
-        ],
-        notes:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        created: new Date().toISOString()
-      },
-      {
-        title: 'Nothing special2',
-        todoList: [
-          { task: 'Task1', completed: true },
-          { task: 'Task2', completed: true }
-        ],
-        notes:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        created: new Date().toISOString()
-      },
-      {
-        title: 'Nothing special 3',
-        todoList: [
-          { task: 'Task1', completed: false },
-          { task: 'Task2', completed: true }
-        ],
-        notes:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        created: new Date().toISOString()
-      }
-    ];
-    private studentNotes: StudentNotes[] = [
-        {
-            student: {displayName: "Student 1", },
-            meetingNotes: this.meetingNotes
+  constructor() {
+    this.intializeRoutes();
+  }
+
+  public intializeRoutes() {
+    this.router.get(`${this.path}/:id`, this.getStudentByID);
+    this.router.post(`${this.path}/create`, this.addNewStudent);
+    this.router.get(`${this.path}`, this.getAllStudents);
+    this.router.delete(`${this.path}/delete/:id`, this.deleteAStudent);
+  }
+
+  addNewStudent = async (
+    request: express.Request,
+    response: express.Response
+  ) => {
+    const st: Student = request.body;
+    const findStudent = await this.students.findOne({ uniqueID: st.uniqueID });
+    if (!findStudent) {
+      this.students.create({
+        uniqueID: st.uniqueID,
+        displayName: st.displayName,
+        email: st.email,
+        course: st.course
+      });
+      response.send('success', 201, st);
+    }
+    response.send('Unsucessful', 400);
+  };
+  getStudentByID = (request: express.Request, response: express.Response) => {
+    const id: number = request.params.id;
+    this.students.findOne({ uniqueID: id }).then(student => {
+      response.send(student);
+    });
+  };
+
+  getAllStudents = (request: express.Request, response: express.Response) => {
+    this.students.find().then(students => {
+      response.send(students);
+    });
+  };
+
+  deleteAStudent = (request: express.Request, response: express.Response) => {
+    const id: number = request.params.id;
+    let d: any;
+    this.students
+    .findOne({ uniqueID: id }).then((data)=> {console.log(data)})
+      .remove().exec()
+      .then(data => {
+        if (data) {
+          response.send(data);
+        } else {
+          response.send(404, 'Not deleted for unknown reason', data);
         }
-    ];
-
-    constructor() {
-        this.intializeRoutes();
-    }
-
-    public intializeRoutes() {
-        this.router.get(this.path, this.getAllStudentNotes.bind(this));
-        this.router.post(this.path, this.createAPost);
-    }
-
-    getAllStudentNotes = (request: express.Request, response: express.Response) => {
-        response.send(this.studentNotes);
-    }
-
-    createAPost = (request: express.Request, response: express.Response) => {
-        const post: StudentNotes = request.body;
-        this.studentNotes.push(post);
-        response.send(post);
-    }
+      });
+  };
 }
 
-export default MeetingNoteController;
+export default StudentController;
