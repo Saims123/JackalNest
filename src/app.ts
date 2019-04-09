@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as mongoose from 'mongoose';
-
+import * as cors from 'cors';
 class App {
 	public app: express.Application;
 	public port: number;
@@ -11,6 +11,7 @@ class App {
 		this.port = port;
 
 		this.initializeMiddlewares();
+		this.initiateCORS();
 		this.initializeControllers(controllers);
 		this.connectToMongoDB();
 	}
@@ -24,6 +25,10 @@ class App {
 		controllers.forEach(controller => {
 			this.app.use('/', controller.router);
 		});
+	}
+
+	private initiateCORS(){
+		this.app.use(cors())
 	}
 
 	public listen() {
