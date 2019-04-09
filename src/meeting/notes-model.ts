@@ -13,8 +13,9 @@ const meetingNotesSchema = new mongoose.Schema({
 });
 
 const notesModel = mongoose.model<StudentNotes & mongoose.Document>(
-  'Notes',
-  meetingNotesSchema
+  'notes',
+  meetingNotesSchema,
+  'notes'
 );
 
 export default notesModel;

@@ -11,8 +11,9 @@ const studentSchema = new mongoose.Schema(
 );
 
 const studentModel = mongoose.model<Student & mongoose.Document>(
-  'students',
-  studentSchema
+  'student',
+  studentSchema,
+  'student'
 );
 
 export default studentModel;
