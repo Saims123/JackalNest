@@ -51,7 +51,7 @@ class StudentController {
       if (students) {
         response.status(200).send(students);
       } else {
-        response.status(404).send('Student Not found', students);
+        response.status(404).send({message: 'Student Not found', error: 404});
       }
     });
   };

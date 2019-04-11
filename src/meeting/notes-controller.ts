@@ -39,7 +39,7 @@ class MeetingNoteController {
   ];
   private studentNotes: StudentNotes[] = [
     {
-      student: { displayName: 'Student 1' },
+      student: { displayName: 'Student 1', uniqueID: 'dw' },
       meetingNotes: this.meetingNotes
     }
   ];
@@ -51,29 +51,37 @@ class MeetingNoteController {
   public intializeRoutes() {
     this.router.get(this.path, this.getAllStudentNotes.bind(this));
     this.router.post(this.path, this.createNoteForStudent);
-    this.router.post(this.path + '/test', this.addNewNote);
-    this.router.get(
-      this.path + '/:id',
-      this.getStudentNotesByID
-    );
+    this.router.post(this.path + '/:id', this.addNewNote);
+    this.router.get(this.path + '/:id', this.getStudentNotesByID);
   }
 
   addNewNote(request: express.Request, response: express.Response) {
+    let student = request.body;
+    //  .findOneAndUpdate(
+    //   { 'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID },
+    //   { $push: { students: supervisionRequest.student } },
+    //   { new: true }
+    // )
     notesModel
-      .findOneAndUpdate({ student: { uniqueID: 'Student 1' } })
+      .findOneAndUpdate(
+        { uniqueID: student.uniqueID },
+        {
+          $push: {
+            'meetingNotes.todoList': { task: 'Another One', completed: false }
+          }
+        },
+        {new: true}
+      )
       .then(student => {
-        student.meetingNotes[0].todoList.push({
-          task: 'Another one',
-          completed: false
-        });
-
-        response.send(student.meetingNotes);
+        response.send(student);
       });
   }
 
   getStudentNotesByID(request: express.Request, response: express.Response) {
     const id = request.params.id;
-    notesModel.find({student: {uniqueID: id}}).then(studentNote => {response.send(studentNote)})
+    notesModel.find({ student: { uniqueID: id } }).then(studentNote => {
+      response.send(studentNote);
+    });
   }
 
   removeStudentNoteByID(request: express.Request, response: express.Response) {
@@ -89,12 +97,15 @@ class MeetingNoteController {
     });
   };
 
-  createNoteForStudent = (request: express.Request, response: express.Response) => {
+  createNoteForStudent = (
+    request: express.Request,
+    response: express.Response
+  ) => {
     const sn: StudentNotes = request.body;
     const index = this.studentNotes.findIndex(
       notes => notes.student.uniqueID === sn.student.uniqueID
     );
-    if (index > 0) { 
+    if (index > 0) {
       this.studentNotes[index].meetingNotes = sn.meetingNotes;
     } else {
       this.studentNotes.push(sn);

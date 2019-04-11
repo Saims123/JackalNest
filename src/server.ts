@@ -10,7 +10,7 @@ const app = new App(
     new StudentController(),
     new SupervisionGroupController()
   ],
-  5000
+  40030
 );
 
 app.listen();

@@ -17,8 +17,8 @@ class SupervisionGroupController {
 
   public intializeRoutes() {
     // this.router.get(`${this.path}/:id`, this.getStudentByID);
-    this.router.post(`${this.path}/add-student`,this.addNewStudentToSupervisor);
-    this.router.post(`${this.path}/add-supervisor`, this.addNewSupervisor);
+    this.router.post(`${this.path}/student`,this.addNewStudentToSupervisor);
+    this.router.post(`${this.path}/supervisor`, this.addNewSupervisor);
     this.router.get(`${this.path}/supervisor/:id`,this.getAllStudentsForSupervisor);
     this.router.delete(`${this.path}/:id`, this.removeStudentFromSupervisor);
   }
@@ -78,12 +78,12 @@ class SupervisionGroupController {
     request: express.Request,
     response: express.Response
   ) => {
-    const supervisorID = request.body;
+    const supervisorID = request.params.id;
     this.findSupervisor(supervisorID).then(students => {
       if (students) {
         response.status(200).send(students);
       } else {
-        response.status(404).send('Student Not found', students);
+        response.status(404).send('Student Not found');
       }
     });
   };
