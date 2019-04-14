@@ -1,6 +1,8 @@
 import * as express from 'express';
-import { MeetingNote, StudentNotes, Student } from './meeting-interfaces';
+import { MeetingNote, StudentNotes } from './meeting-interfaces';
 import notesModel from './notes-model';
+import { runInNewContext } from 'vm';
+import HttpException from 'exceptions/http-exception';
 
 class MeetingNoteController {
   public path = '/notes';
@@ -51,35 +53,39 @@ class MeetingNoteController {
   public intializeRoutes() {
     this.router.get(this.path, this.getAllStudentNotes.bind(this));
     this.router.post(this.path, this.createNoteForStudent);
-    this.router.post(this.path + '/:id', this.addNewNote);
+    this.router.put(this.path + '/:id', this.addNewNote);
     this.router.get(this.path + '/:id', this.getStudentNotesByID);
   }
 
-  addNewNote(request: express.Request, response: express.Response) {
+  addNewNote(
+    request: express.Request,
+    response: express.Response,
+    next: express.NextFunction
+  ) {
     let student = request.body;
-    //  .findOneAndUpdate(
-    //   { 'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID },
-    //   { $push: { students: supervisionRequest.student } },
-    //   { new: true }
-    // )
     notesModel
       .findOneAndUpdate(
         { uniqueID: student.uniqueID },
-        {
-          $push: {
+        { $push: {
             'meetingNotes.todoList': { task: 'Another One', completed: false }
-          }
-        },
-        {new: true}
+          }},
+        { new: true }
       )
       .then(student => {
-        response.send(student);
+        response.status(200).send(student);
       });
   }
 
   getStudentNotesByID(request: express.Request, response: express.Response) {
     const id = request.params.id;
-    notesModel.find({ student: { uniqueID: id } }).then(studentNote => {
+    notesModel.find({ 'student.uniqueID': id }).then(studentNote => {
+      response.send(studentNote);
+    });
+  }
+
+  updateStudentNotesByID(request: express.Request, response: express.Response) {
+    const id = request.params.id;
+    notesModel.findOne({'student.uniqueID': id }).then(studentNote => {
       response.send(studentNote);
     });
   }
@@ -88,12 +94,20 @@ class MeetingNoteController {
     const id = request.params.id;
   }
 
+  updateStudentTaskListByID = (
+    request: express.Request,
+    response: express.Response
+  ) => {};
   getAllStudentNotes = (
     request: express.Request,
     response: express.Response
   ) => {
     notesModel.find().then((studentNotes: StudentNotes[]) => {
-      response.send(studentNotes);
+      if (studentNotes) {
+        response.send(studentNotes);
+      } else {
+        response.status(404).send('Student notes not found');
+      }
     });
   };
 
