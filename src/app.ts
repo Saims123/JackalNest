@@ -41,11 +41,13 @@ class App {
       console.log(`JackaNest listening on the port ${this.port}`);
     });
   }
+  //         'mongodb+srv://jackal:Jackaltrackbase@jackalcluster0-1stlt.mongodb.net/JackalBase',
 
   public connectToMongoDB() {
     mongoose
       .connect(
-        'mongodb+srv://jackal:Jackaltrackbase@jackalcluster0-1stlt.mongodb.net/JackalBase',
+        'mongodb://localhost:27017/JackalBase',
+
         {
           useNewUrlParser: true
         }
