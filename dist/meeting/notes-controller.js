@@ -41,9 +41,15 @@ class MeetingNoteController {
                 meetingNotes: this.meetingNotes
             }
         ];
+        this.updateStudentTaskListByID = (request, response) => { };
         this.getAllStudentNotes = (request, response) => {
             notes_model_1.default.find().then((studentNotes) => {
-                response.send(studentNotes);
+                if (studentNotes) {
+                    response.send(studentNotes);
+                }
+                else {
+                    response.status(404).send('Student notes not found');
+                }
             });
         };
         this.createNoteForStudent = (request, response) => {
@@ -65,29 +71,28 @@ class MeetingNoteController {
     intializeRoutes() {
         this.router.get(this.path, this.getAllStudentNotes.bind(this));
         this.router.post(this.path, this.createNoteForStudent);
-        this.router.post(this.path + '/:id', this.addNewNote);
+        this.router.put(this.path + '/:id', this.addNewNote);
         this.router.get(this.path + '/:id', this.getStudentNotesByID);
     }
-    addNewNote(request, response) {
+    addNewNote(request, response, next) {
         let student = request.body;
-        //  .findOneAndUpdate(
-        //   { 'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID },
-        //   { $push: { students: supervisionRequest.student } },
-        //   { new: true }
-        // )
         notes_model_1.default
-            .findOneAndUpdate({ uniqueID: student.uniqueID }, {
-            $push: {
+            .findOneAndUpdate({ uniqueID: student.uniqueID }, { $push: {
                 'meetingNotes.todoList': { task: 'Another One', completed: false }
-            }
-        }, { new: true })
+            } }, { new: true })
             .then(student => {
-            response.send(student);
+            response.status(200).send(student);
         });
     }
     getStudentNotesByID(request, response) {
         const id = request.params.id;
-        notes_model_1.default.find({ student: { uniqueID: id } }).then(studentNote => {
+        notes_model_1.default.find({ 'student.uniqueID': id }).then(studentNote => {
+            response.send(studentNote);
+        });
+    }
+    updateStudentNotesByID(request, response) {
+        const id = request.params.id;
+        notes_model_1.default.findOne({ 'student.uniqueID': id }).then(studentNote => {
             response.send(studentNote);
         });
     }

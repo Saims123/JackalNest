@@ -46,7 +46,7 @@ class App {
   public connectToMongoDB() {
     mongoose
       .connect(
-        'mongodb://localhost:27017/JackalBase',
+        'mongodb+srv://jackal:Jackaltrackbase@jackalcluster0-1stlt.mongodb.net/JackalBase',
 
         {
           useNewUrlParser: true
