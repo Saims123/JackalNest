@@ -1,8 +1,11 @@
 import { Student } from 'students/student-interface';
+import { Timeslot, MeetingPeriod } from 'timeslots/timeslot-interface';
 
 export interface SupervisionGroup {
   supervisor: Supervisor,
-  students: Student[]
+  students: Student[],
+  timeslots: Timeslot[],
+  meetingPeriod: MeetingPeriod;
 }
 
 export interface Supervisor {
