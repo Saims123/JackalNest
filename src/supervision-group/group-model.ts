@@ -10,7 +10,16 @@ const supervisionModel = new mongoose.Schema(
     },
     students: [
       { uniqueID: String, displayName: String, email: String, course: String }
-    ]
+    ],
+    timeslots: [
+      {
+        startTime: String,
+        endTime: String,
+        day: String,
+        bookedBy: { uniqueID: String, displayName: String }
+      }
+    ],
+    meetingPeriod: { start: Date, end: Date, location: String }
   },
   { timestamps: true }
 );
