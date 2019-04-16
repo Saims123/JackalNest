@@ -15,6 +15,11 @@ class TimeslotsController {
     this.router.get(this.path + '/supervisor/:id', this.getAllTimeslots.bind(this));
     this.router.post(this.path + '/supervisor/:id', this.addNewTimeslots);
     this.router.delete(this.path + '/supervisor/:id', this.removeTimeslots);
+        this.router.put(
+          this.path + 'booking/student/:id',
+          this.bookTimeslot
+        );
+
   }
 
   addNewTimeslots(
@@ -24,11 +29,11 @@ class TimeslotsController {
   ) {
     let _id = request.params.id;
     let req: TimeslotRequestBody = request.body;
-    console.log(_id, req.timeslots);
     timeslotModel.findOneAndUpdate(
         { "supervisor.uniqueID": _id },
         { $set: {
-            'timeslots': req.timeslots
+            'timeslots': req.timeslots,
+            'meetingPeriod' : req.meetingPeriod
           }},
         { new: true }
       )
@@ -42,7 +47,8 @@ class TimeslotsController {
     timeslotModel.findOneAndUpdate(
         { "supervisor.uniqueID": _id },
         { $set: {
-            'timeslots': []
+            'timeslots': [],
+            'meetingPeriod' : {}
           }},
         { new: true }
       )
@@ -51,15 +57,25 @@ class TimeslotsController {
       }).catch(err => {return err;});
   }
 
-  getAllTimeslots = (
-    request: express.Request,
-    response: express.Response
+  bookTimeslot(request: express.Request, response: express.Response) {
+    const _id = request.params.id;
+    timeslotModel.findOneAndUpdate(
+      { 'students.uniqueID': _id },
+      {
+        $set: {
+          timeslots: []
+        }
+      },
+      { new: true }
+    );
+  }
+
+  getAllTimeslots = ( request: express.Request, response: express.Response
   ) => {
     let supervisorID = request.params.id;
-    let requestBody: TimeslotRequestBody =  request.body;
-    timeslotModel.findOne({uniqueID : supervisorID}).then((group) => {
+    timeslotModel.findOne({"supervisor.uniqueID" : supervisorID}).then((group) => {
       if (group) {
-        response.send(group.timeslots);
+        response.status(200).send({meetingPeriod: group.meetingPeriod,timeslots: group.timeslots});
       } else {
         response.status(404).send('Timeslots notes not found');
       }

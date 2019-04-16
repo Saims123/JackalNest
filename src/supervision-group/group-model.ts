@@ -18,7 +18,8 @@ const supervisionModel = new mongoose.Schema(
         day: String,
         bookedBy: { uniqueID: String, displayName: String }
       }
-    ]
+    ],
+    meetingPeriod: { start: Date, end: Date, location: String }
   },
   { timestamps: true }
 );

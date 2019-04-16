@@ -11,9 +11,15 @@ export interface Timeslot {
 export interface TimeslotRequestBody {
 student ?: Student
 supervisor ?: Supervisor;
-timeslots?: Timeslot[]
+timeslots?: Timeslot[],
+meetingPeriod ?: MeetingPeriod
 }
 
+export interface MeetingPeriod {
+  start: Date;
+  end: Date;
+  location: string;
+}
 
 
 
