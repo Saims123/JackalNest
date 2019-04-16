@@ -2,6 +2,9 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as mongoose from 'mongoose';
 import * as cors from 'cors';
+import 'dotenv/config';
+
+const {MONGO_USER, MONGO_PASSWORD, MONGO_PATH} = process.env;
 class App {
 	public app: express.Application;
 	public port: number;
@@ -38,7 +41,7 @@ class App {
 	}
 
 	public connectToMongoDB() {
-		mongoose.connect('mongodb+srv://jackal:Jackaltrackbase@jackalcluster0-1stlt.mongodb.net/JackalBase', {
+		mongoose.connect(`mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}${MONGO_PATH}`, {
 				useNewUrlParser: true
 			})
 			.then(
