@@ -66,7 +66,7 @@ class SupervisionGroupController {
     const findSupervisor = await this.findSupervisorByID(
       supervisionRequest.supervisor.uniqueID
     );
-    if (findSupervisor) {
+    if (!findSupervisor) {
       this.initiateSupervisorGroup(supervisionRequest.supervisor)
         .then(() => {
           if (!findStudent) {

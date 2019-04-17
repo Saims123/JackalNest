@@ -5,7 +5,7 @@ export interface Timeslot {
   startTime: string;
   endTime: string;
   day: string;
-  student: Student;
+  bookedBy: Student;
 }
 
 export interface TimeslotRequestBody {
