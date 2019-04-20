@@ -30,6 +30,7 @@ class StudentController {
         uniqueID: student.uniqueID,
         displayName: student.displayName,
         email: student.email,
+        projectTitle: student.projectTitle,
         course: student.course
       });
       response

@@ -32,7 +32,7 @@ class SupervisionGroupController {
         supervisor: res.supervisor,
         student: res.students.find(student => student.uniqueID === studentID)
       };
-      response.status(200).send(customRes);
+      response.status(200).json(customRes);
     });
   };
 
@@ -121,7 +121,7 @@ class SupervisionGroupController {
     const supervisorID = request.params.id;
     this.findSupervisorByID(supervisorID).then(students => {
       if (students) {
-        response.status(200).send(students);
+        response.status(200).json(students);
       } else {
         response.status(404).send('Student Not found');
       }

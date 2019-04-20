@@ -9,7 +9,7 @@ const supervisionModel = new mongoose.Schema(
       location: String
     },
     students: [
-      { uniqueID: String, displayName: String, email: String, course: String }
+      { uniqueID: String, displayName: String, email: String, projectTitle: String, course: String }
     ],
     timeslots: [
       {

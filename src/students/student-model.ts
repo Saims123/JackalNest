@@ -5,6 +5,7 @@ const studentSchema = new mongoose.Schema(
     uniqueID: String,
     displayName: String,
     email: String,
+    projectTitle: String,
     course: String
   },
   { timestamps: true }
