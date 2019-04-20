@@ -16,7 +16,8 @@ const supervisionModel = new mongoose.Schema(
         startTime: String,
         endTime: String,
         day: String,
-        bookedBy: { uniqueID: String, displayName: String }
+        bookedBy: { uniqueID: String, displayName: String },
+        sendICS : Boolean
       }
     ],
     meetingPeriod: { start: Date, end: Date, location: String }

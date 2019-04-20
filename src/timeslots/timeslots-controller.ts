@@ -82,6 +82,7 @@ class TimeslotsController {
           timeslot.endTime == body.timeslot.endTime
       );
       newTimeslot.timeslots[index].bookedBy = body.student;
+      newTimeslot.timeslots[index].sendICS = false;
       newTimeslot.save();
       response
         .status(200)
@@ -99,6 +100,7 @@ class TimeslotsController {
 
 	newTimeslot.timeslots.forEach((timeslot) => {
 		if(timeslot.bookedBy.uniqueID == _id){
+       timeslot.sendICS = false;
 			timeslot.bookedBy = {displayName : null , uniqueID : null};
 		}
 	})

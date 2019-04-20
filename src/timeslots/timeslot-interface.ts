@@ -6,6 +6,7 @@ export interface Timeslot {
   endTime: string;
   day: string;
   bookedBy: Student;
+  sendICS: boolean;
 }
 
 export interface TimeslotRequestBody {

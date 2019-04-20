@@ -1,4 +1,3 @@
-import { Student } from 'students/student-interface';
 import { Timeslot, MeetingPeriod } from 'timeslots/timeslot-interface';
 
 export interface SupervisionGroup {
@@ -13,6 +12,14 @@ export interface Supervisor {
   displayName: string;
   email: string;
   location: string;
+}
+
+export interface Student {
+  uniqueID: string;
+  displayName: string;
+  email: string;
+  projectTitle: string;
+  course: string;
 }
 
 
