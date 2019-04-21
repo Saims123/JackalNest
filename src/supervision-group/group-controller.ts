@@ -43,7 +43,7 @@ class SupervisionGroupController {
     const supervisor: Supervisor = request.body;
     const findSupervisor = await this.findSupervisorByID(supervisor.uniqueID);
     if (findSupervisor) {
-        this.initiateSupervisorGroup(supervisor);
+      this.initiateSupervisorGroup(supervisor);
       response.status(200).send({
         message: 'Successfully Added Supervisor',
         supervisor: supervisor
@@ -64,29 +64,30 @@ class SupervisionGroupController {
       supervisionRequest.student.uniqueID
     );
 
-          if (!findStudent) {
-            this.supervision
-              .findOneAndUpdate(
-                {
-                  'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID
-                },
-                { $set: {supervisor : supervisionRequest.supervisor}, $push: { students: supervisionRequest.student } },
-                { new: true, upsert: true }
-              )
-              .then(data => {
-                response.status(200).send({
-                  message: 'Successfully added student',
-                  object: data
-                });
-              });
-          } else {
-            response.status(400).send({
-              message: 'Student Already Exist',
-              student: findStudent.students
-            });
-          }
-
- 
+    if (!findStudent) {
+      this.supervision
+        .findOneAndUpdate(
+          {
+            'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID
+          },
+          {
+            $set: { supervisor: supervisionRequest.supervisor },
+            $push: { students: supervisionRequest.student }
+          },
+          { new: true, upsert: true }
+        )
+        .then(data => {
+          response.status(200).send({
+            message: 'Successfully added student',
+            object: data
+          });
+        });
+    } else {
+      response.status(400).send({
+        message: 'Student Already Exist',
+        student: findStudent.students
+      });
+    }
   };
 
   getAllStudentsForSupervisor = async (

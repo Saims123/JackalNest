@@ -11,12 +11,13 @@ class MeetingNoteController {
     this.intializeRoutes();
   }
   public intializeRoutes() {
-    this.router.get(this.path, this.getAllStudentNotes.bind(this));
     this.router.post(this.path + '/:id', this.addNewNote);
-    //this.router.post(this.path + '/:id', this.createNewStudentNoteCollection);
     this.router.get(this.path + '/:id', this.getStudentNotesByID);
-
     this.router.put(this.path + '/:id', this.updateStudentNotesByDate);
+    this.router.delete(
+      this.path + '/:id/:createdDate',
+      this.deleteStudentNoteByDate
+    );
   }
 
   addNewNote(request: express.Request, response: express.Response) {
@@ -70,7 +71,9 @@ class MeetingNoteController {
     notesModel
       .findOneAndUpdate(
         {
-          $and: [{ 'student.uniqueID': id, 'meetingNotes.created': note.created }]
+          $and: [
+            { 'student.uniqueID': id, 'meetingNotes.created': note.created }
+          ]
         },
         { $set: { 'meetingNotes.$': note } },
         { new: true }
@@ -80,35 +83,30 @@ class MeetingNoteController {
       });
   }
 
-  removeStudentNoteByID(request: express.Request, response: express.Response) {
+  deleteStudentNoteByDate(
+    request: express.Request,
+    response: express.Response
+  ) {
     const id = request.params.id;
-    const note = request.body;
+    const createdDate = request.params.createdDate;
 
-    notesModel.findOneAndUpdate(
-      {
-        'student.uniqueID': id
-      },
-      { $pull: { meetingNotes: { created: note.created } } },
-      { new: true }
-    );
+    notesModel
+      .findOneAndUpdate(
+        {
+          'student.uniqueID': id
+        },
+        { $pull: { meetingNotes: { created: createdDate } } },
+        { new: true }
+      )
+      .then(newNote => {
+        response
+          .status(200)
+          .send({
+            message: `Successfully removed note : ${createdDate}`,
+            new: newNote
+          });
+      });
   }
-
-  updateStudentTaskListByID = (
-    request: express.Request,
-    response: express.Response
-  ) => {};
-  getAllStudentNotes = (
-    request: express.Request,
-    response: express.Response
-  ) => {
-    notesModel.find().then((studentNotes: StudentNotes[]) => {
-      if (studentNotes) {
-        response.send(studentNotes);
-      } else {
-        response.status(404).send('Student notes not found');
-      }
-    });
-  };
 }
 
 export default MeetingNoteController;
