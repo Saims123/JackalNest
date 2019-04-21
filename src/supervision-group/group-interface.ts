@@ -1,4 +1,4 @@
-import { Timeslot, MeetingPeriod } from 'timeslots/timeslot-interface';
+import { Timeslot, MeetingPeriod } from 'meeting/timeslots/timeslot-interface';
 
 export interface SupervisionGroup {
   supervisor: Supervisor,

@@ -1,5 +1,5 @@
 import * as express from 'express';
-import timeslotModel from '../supervision-group/group-model';
+import timeslotModel from '../../supervision-group/group-model';
 import { TimeslotRequestBody } from './timeslot-interface';
 
 class TimeslotsController {
@@ -41,7 +41,7 @@ class TimeslotsController {
             meetingPeriod: req.meetingPeriod
           }
         },
-        { new: true }
+        { new: true, upsert: true }
       )
       .then(data => {
         response.status(200).send(data);
