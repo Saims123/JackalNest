@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { MeetingNote, StudentNotes } from '../meeting-interfaces';
+import { MeetingNote } from '../meeting-interfaces';
 import notesModel from './notes-model';
 
 class MeetingNoteController {
@@ -11,18 +11,16 @@ class MeetingNoteController {
     this.intializeRoutes();
   }
   public intializeRoutes() {
-    this.router.post(this.path + '/:id', this.addNewNote);
+    this.router.post(this.path + '/new/:id', this.addNewNote);
     this.router.get(this.path + '/:id', this.getStudentNotesByID);
     this.router.put(this.path + '/:id', this.updateStudentNotesByDate);
-    this.router.delete(
-      this.path + '/:id/:createdDate',
-      this.deleteStudentNoteByDate
-    );
+    this.router.delete(this.path + '/:id/:createdDate', this.deleteStudentNoteByDate);
   }
 
   addNewNote(request: express.Request, response: express.Response) {
     let note = request.body;
     let _id = request.params.id;
+    console.log(note.toDoList);
     notesModel
       .findOneAndUpdate(
         {
@@ -32,19 +30,15 @@ class MeetingNoteController {
         { upsert: true, new: true }
       )
       .then(data => {
+        console.log(data);
         response.send(data);
       });
   }
 
-  createNewStudentNoteCollection(
-    request: express.Request,
-    response: express.Response
-  ) {
+  createNewStudentNoteCollection(request: express.Request, response: express.Response) {
     const _id = request.params.id;
     this.createNewStudentEntry(_id).then(res => {
-      response
-        .status(200)
-        .send({ message: 'Successfully added student entry', return: res });
+      response.status(200).send({ message: 'Successfully added student entry', return: res });
     });
   }
 
@@ -57,23 +51,22 @@ class MeetingNoteController {
 
   getStudentNotesByID(request: express.Request, response: express.Response) {
     const id = request.params.id;
-    notesModel.find({ 'student.uniqueID': id }).then(studentNote => {
-      response.send(studentNote);
+    notesModel.findOne({ 'student.uniqueID': id }).then(studentNote => {
+      if (studentNote) {
+        response.status(200).send(studentNote.meetingNotes);
+      } else {
+        response.send([]);
+      }
     });
   }
 
-  updateStudentNotesByDate(
-    request: express.Request,
-    response: express.Response
-  ) {
+  updateStudentNotesByDate(request: express.Request, response: express.Response) {
     const id = request.params.id;
     const note = request.body;
     notesModel
       .findOneAndUpdate(
         {
-          $and: [
-            { 'student.uniqueID': id, 'meetingNotes.created': note.created }
-          ]
+          $and: [{ 'student.uniqueID': id, 'meetingNotes.created': note.created }]
         },
         { $set: { 'meetingNotes.$': note } },
         { new: true }
@@ -83,10 +76,7 @@ class MeetingNoteController {
       });
   }
 
-  deleteStudentNoteByDate(
-    request: express.Request,
-    response: express.Response
-  ) {
+  deleteStudentNoteByDate(request: express.Request, response: express.Response) {
     const id = request.params.id;
     const createdDate = request.params.createdDate;
 
@@ -99,12 +89,10 @@ class MeetingNoteController {
         { new: true }
       )
       .then(newNote => {
-        response
-          .status(200)
-          .send({
-            message: `Successfully removed note : ${createdDate}`,
-            new: newNote
-          });
+        response.status(200).send({
+          message: `Successfully removed note : ${createdDate}`,
+          new: newNote
+        });
       });
   }
 }
