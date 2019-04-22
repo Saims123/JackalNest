@@ -13,7 +13,8 @@ class MeetingNoteController {
   public intializeRoutes() {
     this.router.post(this.path + '/new/:id', this.addNewNote);
     this.router.get(this.path + '/:id', this.getStudentNotesByID);
-    this.router.put(this.path + '/:id', this.updateStudentNotesByDate);
+    this.router.get(this.path + '/:id/:createdDate', this.getOneStudentNoteByDate);
+    this.router.put(this.path + '/edit/:id', this.updateStudentNotesByDate);
     this.router.delete(this.path + '/:id/:createdDate', this.deleteStudentNoteByDate);
   }
 
@@ -58,6 +59,23 @@ class MeetingNoteController {
         response.send([]);
       }
     });
+  }
+
+  getOneStudentNoteByDate(request: express.Request, response: express.Response) {
+    const id = request.params.id;
+    const created = request.params.createdDate;
+    notesModel
+      .findOne({ 'student.uniqueID': id, 'meetingNotes.created': created })
+      .then(studentNote => {
+        if (studentNote) {
+          let studentNoteResult = studentNote.meetingNotes.find(
+            meetingNote => meetingNote.created == created
+          );
+          response.status(200).send(studentNoteResult);
+        } else {
+          response.status(404).send({ message: 'Student Note not found '});
+        }
+      });
   }
 
   updateStudentNotesByDate(request: express.Request, response: express.Response) {
