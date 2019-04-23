@@ -4,13 +4,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const error_middleware_1 = require("./exceptions/error-middleware");
 class App {
     constructor(controllers, port) {
         this.app = express();
         this.port = port;
         this.initializeMiddlewares();
-        this.initiateErrorHandling();
         this.initiateCORS();
         this.initializeControllers(controllers);
         this.connectToMongoDB();
@@ -18,9 +16,6 @@ class App {
     initializeMiddlewares() {
         this.app.use(bodyParser.json());
         this.app.use(loggerMiddleware);
-    }
-    initiateErrorHandling() {
-        this.app.use(error_middleware_1.default);
     }
     initializeControllers(controllers) {
         controllers.forEach(controller => {
@@ -35,7 +30,6 @@ class App {
             console.log(`JackaNest listening on the port ${this.port}`);
         });
     }
-    //         'mongodb+srv://jackal:Jackaltrackbase@jackalcluster0-1stlt.mongodb.net/JackalBase',
     connectToMongoDB() {
         mongoose
             .connect('mongodb+srv://jackal:Jackaltrackbase@jackalcluster0-1stlt.mongodb.net/JackalBase', {

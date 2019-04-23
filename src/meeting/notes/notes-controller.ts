@@ -90,7 +90,11 @@ class MeetingNoteController {
         { new: true }
       )
       .then(studentNote => {
-        response.send(studentNote);
+        response.status(200).send(studentNote);
+      },
+      (_error) => {
+        response.status(400).send({message: 'Unable to update student', error: _error});
+
       });
   }
 

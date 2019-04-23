@@ -12,7 +12,6 @@ class SupervisionGroupController {
   }
 
   public intializeRoutes() {
-    this.router.get(`${this.path}/:id`, this.getSingleStudent);
     this.router.post(`${this.path}/student`, this.addNewStudentToSupervisor);
     this.router.get(`${this.path}/student/:id`, this.getSingleStudent);
     this.router.post(`${this.path}/supervisor`, this.addNewSupervisor);
