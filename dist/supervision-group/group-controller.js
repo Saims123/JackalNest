@@ -14,7 +14,7 @@ class SupervisionGroupController {
                     supervisor: res.supervisor,
                     student: res.students.find(student => student.uniqueID === studentID)
                 };
-                response.status(200).send(customRes);
+                response.status(200).json(customRes);
             });
         };
         this.addNewSupervisor = async (request, response) => {
@@ -36,54 +36,33 @@ class SupervisionGroupController {
         this.addNewStudentToSupervisor = async (request, response) => {
             const supervisionRequest = request.body;
             const findStudent = await this.findStudentByID(supervisionRequest.student.uniqueID);
-            const findSupervisor = await this.findSupervisorByID(supervisionRequest.supervisor.uniqueID);
-            if (findSupervisor) {
-                this.initiateSupervisorGroup(supervisionRequest.supervisor)
-                    .then(() => {
-                    if (!findStudent) {
-                        this.supervision
-                            .findOneAndUpdate({
-                            'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID
-                        }, { $push: { students: supervisionRequest.student } }, { new: true })
-                            .then(data => {
-                            response.status(200).send({
-                                message: 'Successfully added student',
-                                object: data
-                            });
-                        });
-                    }
-                    else {
-                        response.status(400).send({
-                            message: 'Student Already Exist',
-                            student: findStudent.students
-                        });
-                    }
+            if (!findStudent) {
+                this.supervision
+                    .findOneAndUpdate({
+                    'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID
+                }, {
+                    $set: { supervisor: supervisionRequest.supervisor },
+                    $push: { students: supervisionRequest.student }
+                }, { new: true, upsert: true })
+                    .then(data => {
+                    response.status(200).send({
+                        message: 'Successfully added student',
+                        object: data
+                    });
                 });
             }
             else {
-                if (!findStudent) {
-                    this.supervision
-                        .findOneAndUpdate({ 'supervisor.uniqueID': supervisionRequest.supervisor.uniqueID }, { $push: { students: supervisionRequest.student } }, { new: true })
-                        .then(data => {
-                        response.status(200).send({
-                            message: 'Successfully added student',
-                            student: data
-                        });
-                    });
-                }
-                else {
-                    response.status(400).send({
-                        message: 'Student Already Exist',
-                        student: findStudent.students
-                    });
-                }
+                response.status(400).send({
+                    message: 'Student Already Exist',
+                    student: findStudent.students
+                });
             }
         };
         this.getAllStudentsForSupervisor = async (request, response) => {
             const supervisorID = request.params.id;
             this.findSupervisorByID(supervisorID).then(students => {
                 if (students) {
-                    response.status(200).send(students);
+                    response.status(200).json(students);
                 }
                 else {
                     response.status(404).send('Student Not found');

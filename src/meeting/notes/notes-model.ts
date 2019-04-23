@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { StudentNotes } from './meeting-interfaces';
+import { StudentNotes } from '../meeting-interfaces';
 const meetingNotesSchema = new mongoose.Schema({
     student: { uniqueID: String },
     meetingNotes: [
