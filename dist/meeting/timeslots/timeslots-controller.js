@@ -6,15 +6,11 @@ class TimeslotsController {
     constructor() {
         this.path = '/timeslots';
         this.router = express.Router();
-        this.getAllTimeslots = (request, response) => {
+        this.getAllTimeslotsViaSupervisor = (request, response) => {
             let supervisorID = request.params.id;
-            group_model_1.default
-                .findOne({ 'supervisor.uniqueID': supervisorID })
-                .then(group => {
+            group_model_1.default.findOne({ 'supervisor.uniqueID': supervisorID }).then(group => {
                 if (group) {
-                    response
-                        .status(200)
-                        .send({
+                    response.status(200).send({
                         meetingPeriod: group.meetingPeriod,
                         timeslots: group.timeslots
                     });
@@ -24,10 +20,27 @@ class TimeslotsController {
                 }
             });
         };
+        this.getAllTimeslotsViaStudent = (request, response) => {
+            let studentID = request.params.id;
+            group_model_1.default.findOne({ 'students.uniqueID': studentID }).then(group => {
+                if (group) {
+                    response.status(200).send({
+                        meetingPeriod: group.meetingPeriod,
+                        timeslots: group.timeslots
+                    });
+                }
+                else {
+                    response.status(404).send('Timeslots notes not found');
+                }
+            }, error => {
+                response.status(400).send({ message: 'Timeslot API Error', err: error });
+            });
+        };
         this.intializeRoutes();
     }
     intializeRoutes() {
-        this.router.get(this.path + '/supervisor/:id', this.getAllTimeslots.bind(this));
+        this.router.get(this.path + '/supervisor/:id', this.getAllTimeslotsViaSupervisor.bind(this));
+        this.router.get(this.path + '/student/:id', this.getAllTimeslotsViaStudent.bind(this));
         this.router.post(this.path + '/supervisor/:id', this.addNewTimeslots);
         this.router.delete(this.path + '/supervisor/:id', this.removeTimeslots);
         this.router.put(this.path + '/booking/student/:id', this.bookTimeslot);
@@ -70,14 +83,11 @@ class TimeslotsController {
         const _id = request.params.id;
         const body = request.body;
         group_model_1.default.findOne({ 'supervisor.uniqueID': _id }).then(newTimeslot => {
-            let index = newTimeslot.timeslots.findIndex(timeslot => timeslot.startTime == body.timeslot.startTime &&
-                timeslot.endTime == body.timeslot.endTime);
+            let index = newTimeslot.timeslots.findIndex(timeslot => timeslot.startTime == body.timeslot.startTime && timeslot.endTime == body.timeslot.endTime);
             newTimeslot.timeslots[index].bookedBy = body.student;
             newTimeslot.timeslots[index].sendICS = false;
             newTimeslot.save();
-            response
-                .status(200)
-                .send({
+            response.status(200).send({
                 message: 'Timeslot updated',
                 data: newTimeslot.timeslots[index]
             });
@@ -87,16 +97,14 @@ class TimeslotsController {
         const _id = request.params.id;
         const body = request.body;
         group_model_1.default.findOne({ 'supervisor.uniqueID': body.supervisor.uniqueID }).then(newTimeslot => {
-            newTimeslot.timeslots.forEach((timeslot) => {
+            newTimeslot.timeslots.forEach(timeslot => {
                 if (timeslot.bookedBy.uniqueID == _id) {
                     timeslot.sendICS = false;
                     timeslot.bookedBy = { displayName: null, uniqueID: null };
                 }
             });
             newTimeslot.save();
-            response
-                .status(200)
-                .send({
+            response.status(200).send({
                 message: 'Timeslot unbooked',
                 data: newTimeslot.timeslots
             });
