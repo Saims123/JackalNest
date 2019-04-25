@@ -17,6 +17,8 @@ class TimeslotsController {
     this.router.delete(this.path + '/supervisor/:id', this.removeTimeslots);
     this.router.put(this.path + '/booking/student/:id', this.bookTimeslot);
     this.router.put(this.path + '/booking/cancel/student/:id', this.unbookTimeslot);
+    this.router.put(this.path + '/timeslot/update/supervisor/:id', this.updateTimeslot);
+
   }
 
   addNewTimeslots(
@@ -65,7 +67,22 @@ class TimeslotsController {
         return err;
       });
   }
-
+  updateTimeslot(request: express.Request, response: express.Response) {
+    const _id = request.params.id;
+    const body = request.body;
+    timeslotModel.findOne({ 'supervisor.uniqueID': _id }).then(newTimeslot => {
+      let index = newTimeslot.timeslots.findIndex(
+        timeslot =>
+          timeslot.startTime == body.timeslot.startTime && timeslot.endTime == body.timeslot.endTime
+      );
+      newTimeslot.timeslots[index] = body.timeslot;
+      newTimeslot.save();
+      response.status(200).send({
+        message: 'Timeslot updated',
+        data: newTimeslot.timeslots[index]
+      });
+    });
+  }
   bookTimeslot(request: express.Request, response: express.Response) {
     const _id = request.params.id;
     const body = request.body;
@@ -107,6 +124,7 @@ class TimeslotsController {
     timeslotModel.findOne({ 'supervisor.uniqueID': supervisorID }).then(group => {
       if (group) {
         response.status(200).send({
+          supervisor: group.supervisor,
           meetingPeriod: group.meetingPeriod,
           timeslots: group.timeslots
         });
@@ -121,6 +139,7 @@ class TimeslotsController {
       group => {
         if (group) {
           response.status(200).send({
+            supervisor: group.supervisor,
             meetingPeriod: group.meetingPeriod,
             timeslots: group.timeslots
           });
