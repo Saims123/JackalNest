@@ -11,18 +11,12 @@ class TimeslotsController {
   }
 
   public intializeRoutes() {
-    this.router.get(
-      this.path + '/supervisor/:id',
-      this.getAllTimeslots.bind(this)
-    );
+    this.router.get(this.path + '/supervisor/:id', this.getAllTimeslotsViaSupervisor.bind(this));
+    this.router.get(this.path + '/student/:id', this.getAllTimeslotsViaStudent.bind(this));
     this.router.post(this.path + '/supervisor/:id', this.addNewTimeslots);
     this.router.delete(this.path + '/supervisor/:id', this.removeTimeslots);
-	this.router.put(this.path + '/booking/student/:id', this.bookTimeslot);
-	    this.router.put(
-        this.path + '/booking/cancel/student/:id',
-        this.unbookTimeslot
-      );
-
+    this.router.put(this.path + '/booking/student/:id', this.bookTimeslot);
+    this.router.put(this.path + '/booking/cancel/student/:id', this.unbookTimeslot);
   }
 
   addNewTimeslots(
@@ -78,18 +72,15 @@ class TimeslotsController {
     timeslotModel.findOne({ 'supervisor.uniqueID': _id }).then(newTimeslot => {
       let index = newTimeslot.timeslots.findIndex(
         timeslot =>
-          timeslot.startTime == body.timeslot.startTime &&
-          timeslot.endTime == body.timeslot.endTime
+          timeslot.startTime == body.timeslot.startTime && timeslot.endTime == body.timeslot.endTime
       );
       newTimeslot.timeslots[index].bookedBy = body.student;
       newTimeslot.timeslots[index].sendICS = false;
       newTimeslot.save();
-      response
-        .status(200)
-        .send({
-          message: 'Timeslot updated',
-          data: newTimeslot.timeslots[index]
-        });
+      response.status(200).send({
+        message: 'Timeslot updated',
+        data: newTimeslot.timeslots[index]
+      });
     });
   }
 
@@ -97,39 +88,50 @@ class TimeslotsController {
     const _id = request.params.id;
     const body = request.body;
     timeslotModel.findOne({ 'supervisor.uniqueID': body.supervisor.uniqueID }).then(newTimeslot => {
-
-	newTimeslot.timeslots.forEach((timeslot) => {
-		if(timeslot.bookedBy.uniqueID == _id){
-       timeslot.sendICS = false;
-			timeslot.bookedBy = {displayName : null , uniqueID : null};
-		}
-	})
+      newTimeslot.timeslots.forEach(timeslot => {
+        if (timeslot.bookedBy.uniqueID == _id) {
+          timeslot.sendICS = false;
+          timeslot.bookedBy = { displayName: null, uniqueID: null };
+        }
+      });
       newTimeslot.save();
-      response
-        .status(200)
-        .send({
-          message: 'Timeslot unbooked',
-          data: newTimeslot.timeslots
-        });
+      response.status(200).send({
+        message: 'Timeslot unbooked',
+        data: newTimeslot.timeslots
+      });
     });
   }
 
-  getAllTimeslots = (request: express.Request, response: express.Response) => {
+  getAllTimeslotsViaSupervisor = (request: express.Request, response: express.Response) => {
     let supervisorID = request.params.id;
-    timeslotModel
-      .findOne({ 'supervisor.uniqueID': supervisorID })
-      .then(group => {
+    timeslotModel.findOne({ 'supervisor.uniqueID': supervisorID }).then(group => {
+      if (group) {
+        response.status(200).send({
+          meetingPeriod: group.meetingPeriod,
+          timeslots: group.timeslots
+        });
+      } else {
+        response.status(404).send('Timeslots notes not found');
+      }
+    });
+  };
+  getAllTimeslotsViaStudent = (request: express.Request, response: express.Response) => {
+    let studentID = request.params.id;
+    timeslotModel.findOne({ 'students.uniqueID': studentID }).then(
+      group => {
         if (group) {
-          response
-            .status(200)
-            .send({
-              meetingPeriod: group.meetingPeriod,
-              timeslots: group.timeslots
-            });
+          response.status(200).send({
+            meetingPeriod: group.meetingPeriod,
+            timeslots: group.timeslots
+          });
         } else {
           response.status(404).send('Timeslots notes not found');
         }
-      });
+      },
+      error => {
+        response.status(400).send({ message: 'Timeslot API Error', err: error });
+      }
+    );
   };
 }
 
