@@ -15,16 +15,14 @@ class SupervisionGroupController {
     this.router.post(`${this.path}/student`, this.addNewStudentToSupervisor);
     this.router.get(`${this.path}/student/:id`, this.getSingleStudent);
     this.router.post(`${this.path}/supervisor`, this.addNewSupervisor);
-    this.router.get(
-      `${this.path}/supervisor/:id`,
-      this.getAllStudentsForSupervisor
-    );
+    this.router.get(`${this.path}/supervisor/:id`, this.getAllStudentsForSupervisor);
     this.router.delete(`${this.path}/:id`, this.removeStudentFromSupervisor);
   }
-  getSingleStudent = async (
-    request: express.Request,
-    response: express.Response
-  ) => {
+  /**
+   * GET API to return one student found using ID
+   * @param {student} Student
+   */
+  getSingleStudent = async (request: express.Request, response: express.Response) => {
     const studentID = request.params.id;
     this.findStudentByID(studentID).then(res => {
       let customRes = {
@@ -34,11 +32,13 @@ class SupervisionGroupController {
       response.status(200).json(customRes);
     });
   };
+  /**
+   * POST API to create new supervision group with supervisor
+   * @param {supervisor} Supervisor
+   * @param {id} string
+   */
 
-  addNewSupervisor = async (
-    request: express.Request,
-    response: express.Response
-  ) => {
+  addNewSupervisor = async (request: express.Request, response: express.Response) => {
     const supervisor: Supervisor = request.body;
     const findSupervisor = await this.findSupervisorByID(supervisor.uniqueID);
     if (findSupervisor) {
@@ -48,20 +48,18 @@ class SupervisionGroupController {
         supervisor: supervisor
       });
     } else {
-      response
-        .status(400)
-        .send({ message: 'Supervisor Already Exist', supervisor: supervisor });
+      response.status(400).send({ message: 'Supervisor Already Exist', supervisor: supervisor });
     }
   };
-
-  addNewStudentToSupervisor = async (
-    request: express.Request,
-    response: express.Response
-  ) => {
+  /** POST API to add new student in the group with supervisor
+   * Can only add new students under the condition that :
+   * 1. It is not already in another supervision group
+   * 2. It does not already exist in current supervision group
+   * 3. Supervisor cannot be student at the same time
+   */
+  addNewStudentToSupervisor = async (request: express.Request, response: express.Response) => {
     const supervisionRequest: SupervisionGroupRequest = request.body;
-    const findStudent = await this.findStudentByID(
-      supervisionRequest.student.uniqueID
-    );
+    const findStudent = await this.findStudentByID(supervisionRequest.student.uniqueID);
 
     if (!findStudent) {
       this.supervision
@@ -89,10 +87,7 @@ class SupervisionGroupController {
     }
   };
 
-  getAllStudentsForSupervisor = async (
-    request: express.Request,
-    response: express.Response
-  ) => {
+  getAllStudentsForSupervisor = async (request: express.Request, response: express.Response) => {
     const supervisorID = request.params.id;
     this.findSupervisorByID(supervisorID).then(students => {
       if (students) {
@@ -102,11 +97,11 @@ class SupervisionGroupController {
       }
     });
   };
+  /** DELETE API to remove existing student from the group array, search by ID
+   *  @param {student} string
+   */
 
-  removeStudentFromSupervisor = async (
-    request: express.Request,
-    response: express.Response
-  ) => {
+  removeStudentFromSupervisor = async (request: express.Request, response: express.Response) => {
     const id: string = request.params.id;
     let isFound = await this.findStudentByID(id);
 
@@ -132,11 +127,14 @@ class SupervisionGroupController {
       });
   };
 
-  // Helper Functions
+  /**
+   * Helper function to search for one supervisor by id
+   * @param uniqueID
+   */
 
   findSupervisorByID(uniqueID: string) {
     return this.supervision
-      .find({
+      .findOne({
         'supervisor.uniqueID': uniqueID
       })
       .catch(err => {
@@ -144,6 +142,10 @@ class SupervisionGroupController {
       });
   }
 
+  /**
+   * Helper function to search for one student by id
+   * @param uniqueID
+   */
   findStudentByID(uniqueID: string) {
     return this.supervision
       .findOne({
@@ -153,6 +155,10 @@ class SupervisionGroupController {
         return err;
       });
   }
+  /** Helper function seperated to create supervision-group document, before adding supervisor into the document
+   *
+   * @param supervisor
+   */
   async initiateSupervisorGroup(supervisor) {
     const findSupervisor = await this.findSupervisorByID(supervisor.uniqueID);
     if (findSupervisor) {

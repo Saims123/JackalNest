@@ -3,7 +3,7 @@
     "sourceMap": true,
     "module" : "commonjs",
     "target": "es2017",
-    "outDir": "../prorotype/dist/nest",
+    "outDir": "../prototype/dist/nest",
     "baseUrl": "./src"
   },
   "include": [
