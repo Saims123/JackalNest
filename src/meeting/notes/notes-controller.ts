@@ -21,7 +21,6 @@ class MeetingNoteController {
   addNewNote(request: express.Request, response: express.Response) {
     let note = request.body;
     let _id = request.params.id;
-    console.log(note.toDoList);
     notesModel
       .findOneAndUpdate(
         {
@@ -31,7 +30,6 @@ class MeetingNoteController {
         { upsert: true, new: true }
       )
       .then(data => {
-        console.log(data);
         response.send(data);
       });
   }

@@ -72,7 +72,7 @@ class TimeslotsController {
     const body = request.body;
     timeslotModel.findOne({ 'supervisor.uniqueID': _id }).then(newTimeslot => {
       let index = newTimeslot.timeslots.findIndex(
-        timeslot => timeslot.startTime == body.timeslot.startTime && timeslot.endTime == body.timeslot.endTime
+        timeslot => (timeslot.startTime == body.timeslot.startTime) && (timeslot.endTime == body.timeslot.endTime)
       );
       newTimeslot.timeslots[index] = body.timeslot;
       newTimeslot.save();
